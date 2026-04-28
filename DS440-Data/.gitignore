@@ -1,0 +1,10 @@
+.venv/*
+data_transformed.csv
+data_transformed.csv.zip
+data.csv
+sample.csv
+test_playfield_transformed.csv
+boardStrings.json
+cases.csv
+cases.json
+states.json
