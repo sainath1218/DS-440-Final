@@ -322,7 +322,9 @@ else:
     print('loading 200k')
     sample_50k = pd.read_pickle("sample_200k.pkl")
     print('loaded 200k')
+
 # this model only takes in the board states and attempts to score them on its own 
+# NOT WHAT WAS USED MODEL_2 WAS USED IN FINAL MODEL CREATION
 def model_only_using_moves():
 
     board_input = Input(shape=(40, 10, 1), name="board_input") # shape is 40 rows 10 cols and 1 channel
