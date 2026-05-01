@@ -29,7 +29,7 @@ class PredictRequest(BaseModel):
     queue: str
     init_board: str
 
-
+# generates a list of candidate boards for a given piece and playfield
 def get_candidates(playfield_array, piece):
     if piece == 0:
         return []
@@ -42,6 +42,7 @@ def get_candidates(playfield_array, piece):
     
     return boards1 
 
+# gets the numpy array for all boards
 def get_board_arrays(states, init_board_matrix, init_piece):
     seen = {}
     for px, py, r in states:
@@ -51,6 +52,7 @@ def get_board_arrays(states, init_board_matrix, init_piece):
             seen[key] = (arr, px, py, r)
     return list(seen.values())
 
+# converts a board array to a flat string for output to frontend
 def board_to_flat_string(board):
     grid = mod_board_matrix_to_helper(board)  # list of lists
     return "".join("".join(row) for row in grid)
@@ -62,11 +64,12 @@ def predict(req: PredictRequest):
     print(req.placed, req.hold, req.queue, req.init_board)
 
 
-
+    # gets matrix/integer representation of all features and converts for model input
     board_array = np.array([vocab[c] for c in req.init_board]).reshape(40, 10)
     print('board_array', board_array)
     board_int = np.flip(board_array, axis=0).flatten().tolist()  
     queue_int = [vocab[c] for c in req.queue]
+    # if hold is empty takes the first piece in queue to generate possible moves, otherwise uses the piece in hold
     to_place_int = vocab[req.placed]
     if req.hold == "N":
         hold_int = queue_int[0]
@@ -78,6 +81,7 @@ def predict(req: PredictRequest):
     print('hold_int', hold_int)
     print('queue_int', queue_int)
 
+    # gets candidate boards does it seperatly in order to distiguish if the hold or to place piece was used. 
     candidates_place = get_candidates(np.array(board_int), to_place_int)
     candidates_hold = get_candidates(np.array(board_int), hold_int)
     all_candidates_with_pos = candidates_place + candidates_hold
@@ -89,6 +93,7 @@ def predict(req: PredictRequest):
     all_candidates = [item[0] for item in all_candidates_with_pos]
     all_positions  = [(item[1], item[2], item[3]) for item in all_candidates_with_pos]
 
+    # converts to proper formatting for model input
     X_queue     = np.array([queue_int] * n)
     X_hold      = np.array([[hold_int]] * n)
     X_place     = np.array([[to_place_int]] * n)
@@ -106,6 +111,7 @@ def predict(req: PredictRequest):
         verbose=1
     ).flatten()
 
+    # takes the candidate with the highest predicted value and returns the corresponding board state, label (hold or place), and position (x, y, r) for the frontend to use in rendering the move
     best_idx       = np.argmax(pred)
     best_candidate = all_candidates[best_idx]
     best_label     = labels[best_idx]

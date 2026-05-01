@@ -30,6 +30,9 @@ def string_board_states(states, init_board_matrix, init_piece):
 
     return sorted(list(set(boardStrings)))
 
+# loads the initial dataset and selects only the desired features
+# adds the next playfield feature to each case
+# removes all cases of garbage being placed to avoid the issue candidate generation. 
 '''
 df = pd.read_pickle("data.pkl")
 print('og df info')
@@ -39,7 +42,7 @@ print(df.info())
 df = df.sort_values(['game_id', 'subframe']).reset_index(drop=True)
 df['next_playfield'] = df.groupby('game_id')['playfield_transformed'].shift(-1)
 df_transformed = df.dropna(subset=['next_playfield']).copy()
-# added to remove the garbage issue NEEDS TO BE FIXED
+# added to remove the garbage issue 
 df_transformed = df_transformed[df_transformed['immediate_garbage'] == 0]
 
 df_transformed = df_transformed[[
@@ -52,10 +55,12 @@ df_transformed = df_transformed[[
 ]]
 print('df transformed info')
 print(df_transformed.info())
-
+'''
 
 #already performed so it is just loaded now
-
+# creates df int whih contains the integer representation of the playfield and pieces for use in the CNN model
+# saves the resulting df to a pickle for faster loading in the future
+'''
 # switching all of df_transformed to int for CNN
 vocab = {"N":0,"G":1,"I":2,"O":3,"T":4,"S":5,"Z":6,"J":7,"L":8}
 df_int = df_transformed.copy()
@@ -94,6 +99,8 @@ inv_vocab = {0:"N", 1:"G", 2:"I", 3:"O", 4:"T", 5:"S", 6:"Z", 7:"J", 8:"L"}
 
 '''
 # for string
+# generates the candidate boards for the first n cases and checks to see if the correct next playfield is generated
+### FOR TESTING ###
 '''
 playfield_counts=[]
 failed = 0
@@ -135,6 +142,8 @@ for x in range(1000):
     # print(boardStrings1, boardStrings2)
 '''
 #for numpy ints
+# generates the candidate boards for the first n cases and checks to see if the correct next playfield is generated
+### FOR TESTING ###
 '''
 playfield_counts=[]
 failed = 0
@@ -195,6 +204,7 @@ def candidate_padding(input_candidates,padding_size = 128):
 
 # sample_20k = df_int.iloc[:20000].copy()
 
+# generates all candidates for each case and pads so each array of candidates is the same length 
 def get_candidates_1(row):
     boards1 = get_board_arrays(
         getAllBoardStates(row['playfield_array'], row['placed'], True),
@@ -217,6 +227,8 @@ def get_candidates_1(row):
     boards, mask = candidate_padding(boards1 + boards2, padding_size=128)
     return boards, mask
 
+# gens a raw list of all candidates without padding
+### WHAT WAS USED ###
 def get_candidates_2(row):
     boards1 = get_board_arrays(
         getAllBoardStates(row['playfield_array'], row['placed'], True),
