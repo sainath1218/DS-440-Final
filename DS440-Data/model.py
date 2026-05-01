@@ -2,7 +2,9 @@ import numpy as np
 import tensorflow as tf
 from keras import layers
 
-
+########################################
+# RESIDUAL FILE. IT WAS NEVER USED IN THE FINAL MODEL PIPELINE BUT IT CONTAINS ONE ATTEMPTS AT A VAE-STYLE MODEL
+########################################
 
 """
 TensorFlow (Keras) model:
